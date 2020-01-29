@@ -37,18 +37,29 @@ def main():
             i += 1
         print(urls)
         print(names)
-
-            # for i in range(len(list)):
-            #     print("i EQUALS ", i)
-            #     print(list[i])
-            #     i += 1
-
-
-            # list = dl.split('"')
-            # link = list[3]
-            # print(list)
+        DLSongs(urls, names)
+        print("Finished")
     except ImportError:
         print("Mapper does not exist")
 
+
+def DLSongs(urls: str, names: str):
+    print("URLS")
+    print(urls)
+    print("NAMES")
+    print(names)
+    for i in range(len(urls)):
+        urlsplit = urls[i].split("/")
+        key = urlsplit[4]
+        key = "https://beatsaver.com/api/download/key/" + key
+        r = requests.get(key, stream=True)
+        print("Dowloading ", names[i])
+        print(urls[i])
+        if r.status_code == 200:
+            path = names[i]
+            path = r"C:\Users\acpoh\Documents\Programming\Python\Beat Saber DL\dl\\" + path + ".zip"
+            with open(path, 'wb') as f:
+                r.raw.decode_content = True
+                shutil.copyfileobj(r.raw, f)
 
 main()
