@@ -4,19 +4,28 @@ import re
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
-def pageSearch(mapper):
-    pass
-
-
-def main():
+def setup():
     mapper = input("Input mapper name:").lower()
     driver = webdriver.Chrome()
-    url = "https://bsaber.com/songs/new/?uploaded_by="
+    parsePage(mapper, 1, driver)
+
+def parsePage(mapper : str, page : int, driver : webdriver):
+    if page == 1:
+        url = "https://bsaber.com/songs/new/?uploaded_by="
+    else:
+        url = "https://bsaber.com/songs/new/page/" + str(page) + "/?uploaded_by="
     url += mapper
     try:
         driver.get(url)
         content = driver.page_source
         soup = BeautifulSoup(content, features="html.parser")
+        if soup.find(text="No articles found matching your query"):
+            if page == 1:
+                print("Mapper not found")
+                exit()
+            else:
+                print("All Downloads Complete")
+                exit()
         songs = soup.findAll("a", {"rel" : False}, href=re.compile("https://bsaber.com/songs/"))
         i = 0
         urls = []
@@ -38,9 +47,15 @@ def main():
         print(urls)
         print(names)
         DLSongs(urls, names)
-        print("Finished")
+        print("Finished Page")
+        parsePage(mapper, page + 1, driver)
     except ImportError:
-        print("Mapper does not exist")
+        if page == 1:
+            print("Mapper does not exist")
+
+
+def main():
+    setup()
 
 
 def DLSongs(urls: str, names: str):
@@ -56,10 +71,25 @@ def DLSongs(urls: str, names: str):
         print("Dowloading ", names[i])
         print(urls[i])
         if r.status_code == 200:
-            path = names[i]
-            path = r"C:\Users\acpoh\Documents\Programming\Python\Beat Saber DL\dl\\" + path + ".zip"
+            name = fixName(names[i])
+            path = r"C:\Users\acpoh\Documents\Programming\Python\Beat Saber DL\dl\\" + name + ".zip"
+            print("Saving to ", path)
             with open(path, 'wb') as f:
                 r.raw.decode_content = True
                 shutil.copyfileobj(r.raw, f)
+
+
+def fixName(name: str):
+    name = name.replace(r"\\", "")
+    name = name.replace("/", "")
+    name = name.replace("*", "")
+    name = name.replace(":", "")
+    name = name.replace("?", "")
+    name = name.replace(">", "")
+    name = name.replace("<", "")
+    name = name.replace('"', "")
+    name = name.replace('|', "")
+    return name
+
 
 main()
