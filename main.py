@@ -79,7 +79,9 @@ def DLSongs(urls: str, names: str):
             os.mkdir("dl")
         if r.status_code == 200:
             name = fixName(names[i])
-            path = r"C:\Users\acpoh\Documents\Programming\Python\Beat Saber DL\dl\\" + name + ".zip"
+            directory = os.getcwd()
+            directory = directory + r"/dl//"
+            path = directory + name + ".zip"
             print("Saving to ", path)
             with open(path, 'wb') as f:
                 r.raw.decode_content = True
@@ -100,3 +102,4 @@ def fixName(name: str):
 
 
 main()
+print(os.getcwd())
