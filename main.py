@@ -3,11 +3,14 @@ import shutil
 import re
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import os
+
 
 def setup():
     mapper = input("Input mapper name:").lower()
     driver = webdriver.Chrome()
     parsePage(mapper, 1, driver)
+
 
 def parsePage(mapper : str, page : int, driver : webdriver):
     if page == 1:
@@ -70,6 +73,10 @@ def DLSongs(urls: str, names: str):
         r = requests.get(key, stream=True)
         print("Dowloading ", names[i])
         print(urls[i])
+        exsist = os.path.isdir("dl")
+        print(exsist)
+        if exsist == False:
+            os.mkdir("dl")
         if r.status_code == 200:
             name = fixName(names[i])
             path = r"C:\Users\acpoh\Documents\Programming\Python\Beat Saber DL\dl\\" + name + ".zip"
