@@ -1,6 +1,5 @@
 import requests
 import shutil
-import re
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import os
@@ -12,31 +11,26 @@ from tkinter import *
 # Begins to parse the first page of songs
 def setup():
 
-
-
     # Starting web driver
+    print("Starting web driver...")
     option = webdriver.ChromeOptions()
     option.add_argument("headless")
     driver = webdriver.Chrome(options=option)
-    print("Starting web driver")
+    print("Web driver setup complete")
 
     root = Tk()
-    root.geometry("500x200")
+    root.title("BSDL")
+    root.geometry("300x200")
     gui = GUI(root, driver)
     root.mainloop()
 
-    # Download maps
-    #mapper = gui.getName()
-    #mapper = input("Input mapper name:").lower()
-    #parsePage(mapper, 1, driver)
 
-
-# parsePage() takes a mapper name, a page number, and a webdriver as paramaters
+# parsePage() takes a mapper name, a page number, and a web driver as paramaters
 # The function then loops through the page looking for html links that match specific criteria
 # It saves these links in an array and then passes them all to DLSongs()
 # parsePage() then recursively calls itself with page + 1
 # If page does not exist, program stops
-def parsePage(mapper : str, page : int, driver : webdriver):
+def parsePage(mapper: str, page: int, driver: webdriver):
     if page == 1:
         url = "https://bsaber.com/songs/new/?uploaded_by="
     else:
@@ -81,10 +75,9 @@ def parsePage(mapper : str, page : int, driver : webdriver):
         print("Finished Page")
         # Recursively loop through function until empty page found
         parsePage(mapper, page + 1, driver)
-    # This exception is currently unused, should be removed
-    except Exception:
-        if page == 1:
-            print("Mapper does not exist")
+    # Catch any exception and print to user
+    except Exception as e:
+        print(e)
 
 
 def main():
@@ -92,17 +85,12 @@ def main():
 
 
 def DLSongs(urls: str, names: str):
-    #
-    # print("URLS")
-    # print(urls)
-    # print("NAMES")
-    # print(names)
     for i in range(len(urls)):
         urlsplit = urls[i].split("/")
         key = urlsplit[4]
         key = "https://beatsaver.com/api/download/key/" + key
         r = requests.get(key, stream=True)
-        print("Dowloading ", names[i])
+        print("Downloading ", names[i])
         print(urls[i])
         # Check if dl folder exists in working directory
         direct = os.path.isdir("dl")
@@ -118,6 +106,7 @@ def DLSongs(urls: str, names: str):
                 r.raw.decode_content = True
                 shutil.copyfileobj(r.raw, f)
 
+
 # fixName() accepts a string and removes certain characters that cause problems
 # in Windows file names
 def fixName(name: str):
@@ -132,30 +121,35 @@ def fixName(name: str):
     name = name.replace('|', "")
     return name
 
+
 class GUI:
 
     def __init__(self, master, driver):
+        self.master = master
         frame = Frame(master)
         frame.pack()
         self.driver = driver
         self.label = Label(frame, text="Input Mapper Name")
-        self.label.pack()
-        self.button = Button(frame, text="DOWNLOAD!", fg="red", command=self.beginDL)
-        self.button.pack()
+        self.label.pack(pady=10)
         self.input = Entry(frame)
-        self.input.pack()
+        self.input.pack(pady=10)
+        self.button = Button(frame, text="DOWNLOAD!", fg="red", command=self.beginDL)
+        self.button.pack(pady=10)
+
+        menuBar
 
     def beginDL(self):
         mapper = self.input.get()
         parsePage(mapper, 1, self.driver)
 
+    def openSettings(self):
+        self.settingsFrame = Toplevel(self.master)
+        self.settings = Settings(self.settingsFrame)
 
-    def begin(self):
-        root = Tk()
-        root.geometry("500x200")
-        gui = GUI(root)
-        root.mainloop()
 
+class Settings:
+    def __init__(self, master):
+        frame = Frame(master)
 
 
 main()
