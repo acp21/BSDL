@@ -136,15 +136,20 @@ class GUI:
         self.button = Button(frame, text="DOWNLOAD!", fg="red", command=self.beginDL)
         self.button.pack(pady=10)
 
-        menuBar
+        # Currently unimplemented settings menu
+        # menuBar = Menu(frame)
+        # menuBar.add_command(label="settings", command=self.openSettings)
+        # master.config(menu=menuBar)
 
     def beginDL(self):
         mapper = self.input.get()
         parsePage(mapper, 1, self.driver)
 
+    # TODO: Implement settings menu
     def openSettings(self):
         self.settingsFrame = Toplevel(self.master)
         self.settings = Settings(self.settingsFrame)
+        self.settingsFrame.title("Settings")
 
 
 class Settings:
