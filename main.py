@@ -5,6 +5,8 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import os
 from tkinter import *
+import json
+import urllib.request
 
 
 # Setup function gets mapper name from user
@@ -19,6 +21,10 @@ def setup():
     option.add_argument("headless")
     driver = webdriver.Chrome(options=option)
     print("Starting web driver")
+    # Ensure DL folder exists
+    direct = os.path.isdir("dl")
+    if not direct:
+        os.mkdir("dl")
 
     root = Tk()
     root.geometry("500x200")
@@ -91,6 +97,50 @@ def main():
     setup()
 
 
+def getMapperID(mapper: str):
+    url = "https://beatsaver.com/api/search/advanced?q=uploader.username:" + mapper.lower()
+    response = urllib.request.urlopen(url)
+    data = json.loads(response.read())
+    mapperID = data["docs"][0]["uploader"]["_id"]
+    lastPage = data["lastPage"]
+    print(mapper.upper(), "ID:")
+    print(data["docs"][0]["uploader"]["_id"])
+    print(lastPage + 1, "Total pages")
+    DLPage(mapperID, 0, lastPage)
+    #return mapperID, lastPage
+
+
+def DLPage(mapperID: str, page: int, totalPages: int):
+    url = "https://beatsaver.com/api/maps/uploader/"
+    url += mapperID + "/" + str(page)
+    response = urllib.request.urlopen(url)
+    data = json.loads(response.read())
+    if page < totalPages:
+        i = 0
+        while True:
+            try:
+                name = data["docs"][i]["name"]
+                key = "https://beatsaver.com" + data["docs"][i]["downloadURL"]
+                r = requests.get(key, stream=True)
+                print("Downloading", name)
+                if r.status_code == 200:
+                    name = fixName(name)
+                    directory = os.getcwd()  # Get working directory
+                    directory = directory + r"/dl//"
+                    path = directory + name + ".zip"
+                    print("Saving to ", path)
+                    with open(path, 'wb') as f:
+                        r.raw.decode_content = True
+                        shutil.copyfileobj(r.raw, f)
+                i += 1
+            except IndexError:
+                print("END OF PAGE")
+                DLPage(mapperID, page + 1, totalPages)
+    else:
+        print("Download Complete")
+        sys.exit()
+
+
 def DLSongs(urls: str, names: str):
     #
     # print("URLS")
@@ -147,8 +197,7 @@ class GUI:
 
     def beginDL(self):
         mapper = self.input.get()
-        parsePage(mapper, 1, self.driver)
-
+        getMapperID(mapper.lower())
 
     def begin(self):
         root = Tk()
@@ -158,4 +207,5 @@ class GUI:
 
 
 
-main()
+if __name__ == "__main__":
+    getMapperID("oddloop")
