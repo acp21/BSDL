@@ -1,8 +1,4 @@
 # BSDL
-BSDL (Beat Saber Downloader) is a program designed to mass download beat saber maps.
-
-Upon launch, the program opens a gui with a single text box, the user inputs the username of a mapper on beatsaver.com, and the program will download all maps by that user. The maps are downloaded into the main/dl folder.
-
-The program works using several libraries, including tkinter, selenium webdriver, bs4, and requests.
-
-I later plan on adding more features including auto song installation and downloading songs by tag
+BSDL (Beat Saber Downloader) is a program designed to mass download beat saber maps based on the user that created the Map
+This is done by using the BeatSaver.com REST API, allowing the program to check the most updated index of maps.
+User interaction is done using the tkinter python framework.
